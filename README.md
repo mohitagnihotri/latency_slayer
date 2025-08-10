@@ -22,6 +22,7 @@ Both auto-refresh every 2 seconds.
 ---
 
 ## Internals
+```
 Client → /chat
 ├─ Embed(prompt) → OpenAI embeddings (1536-d)
 ├─ KNN search in Redis (HNSW, cosine) with filters: @model, @route
@@ -30,6 +31,7 @@ Client → /chat
 HSET prompt/model/route/user/created_at/embedding
 HSETEX resp with TTL (field-level)
 └─ XADD analytics:cache (hit, latency_ms, tokens_saved)
+```
 
 **Why field-level TTL?**  
 We only TTL the **answer** (`resp`), not the whole hash. Vectors and tags remain in the index to capture future near-duplicates even if a specific answer has expired.
