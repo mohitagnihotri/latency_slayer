@@ -81,3 +81,5 @@ curl -s -X POST http://localhost:8080/chat \
 Open http://localhost:8080 to see the metrics and sparkline live.
 
 
+## Contributing
+PRs welcome! If you’re adding features (INT8 quantization, alternative providers, multi-tenant keys), please include a short note in the README and keep the sample env vars updated.
