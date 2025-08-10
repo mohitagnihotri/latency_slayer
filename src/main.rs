@@ -3,58 +3,16 @@
 // Contributors: Mohit Agnihotri
 // References: Redis Labs and the OpenAI documentation for embeddings and chat completions.
 
+pub mod types;
+
+use crate::types::*;
 use axum::{
     routing::{get, post},
     Json, Router,
 };
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use sha2::{Digest, Sha256};
 use std::{collections::HashMap, sync::Arc};
-
-// ============================
-// App State & Types
-// ============================
-#[derive(Clone)]
-struct AppState {
-    redis: redis::Client,
-    embed_dim: usize,
-    ttl_secs: usize,
-    threshold: f32,
-    gen_model: String,
-}
-
-#[derive(Deserialize, Clone)]
-struct Message {
-    role: String,
-    content: String,
-}
-
-#[derive(Deserialize)]
-struct ChatReq {
-    user: Option<String>,
-    model: Option<String>,
-    route: Option<String>,
-    messages: Vec<Message>,
-    threshold: Option<f32>,
-}
-
-#[derive(Serialize)]
-struct ChatResp {
-    cached: bool,
-    response: String,
-    latency_ms: u128,
-    hit_distance: Option<f32>,
-    hit_key: Option<String>,
-}
-
-#[derive(Serialize, Default)]
-struct MetricsOut {
-    total: usize,
-    hits: usize,
-    hit_rate: f32,
-    p50_ms: u128,
-    p95_ms: u128,
-}
 
 // ============================
 // Main
