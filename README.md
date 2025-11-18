@@ -44,6 +44,47 @@ HSETEX resp with TTL (field-level)
 **Why field-level TTL?**  
 We only TTL the **answer** (`resp`), not the whole hash. Vectors and tags remain in the index to capture future near-duplicates even if a specific answer has expired.
 
+## Sequence diagrams
+
+### Cache hit path
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Latency Slayer
+    participant OE as OpenAI Embeddings
+    participant R as Redis
+    C->>S: POST /chat (prompt/model/route/threshold)
+    S->>OE: text-embedding-3-small(prompt)
+    OE-->>S: embedding vector
+    S->>R: FT.SEARCH idx:latency_slayer KNN 1 @model+@route
+    R-->>S: nearest key + __embedding_score
+    S->>R: HGETEX key resp EX ttl
+    R-->>S: cached resp (TTL refreshed)
+    S->>R: XADD analytics:cache hit=1
+    S-->>C: 200 OK (cached=true, resp, hit_distance)
+```
+
+### Cache miss path
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant S as Latency Slayer
+    participant OE as OpenAI Embeddings
+    participant OC as OpenAI Chat
+    participant R as Redis
+    C->>S: POST /chat
+    S->>OE: embedding request
+    OE-->>S: embedding vector
+    S->>R: FT.SEARCH idx:latency_slayer KNN 1
+    R-->>S: no candidate ≤ threshold
+    S->>OC: chat completion (prompt, model)
+    OC-->>S: generated response
+    S->>R: HSET key prompt/model/route/user/embedding
+    S->>R: HSETEX key resp EX ttl value
+    S->>R: XADD analytics:cache hit=0
+    S-->>C: 200 OK (cached=false, resp, new hit_key)
+```
+
 ## Environment Variables
 
 | Name | Example | Notes |

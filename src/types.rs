@@ -1,25 +1,23 @@
+use crate::config::Config;
 use serde::{Deserialize, Serialize};
 
 // ============================
 // App State & Types
 // ============================
 #[derive(Clone)]
-pub(crate) struct AppState {
-    pub(crate) redis: redis::Client,
-    pub(crate) embed_dim: usize,
-    pub(crate) ttl_secs: usize,
-    pub(crate) threshold: f32,
-    pub(crate) gen_model: String,
+pub struct AppState {
+    pub redis: redis::Client,
+    pub config: Config,
 }
 
 #[derive(Deserialize, Clone)]
-pub(crate) struct Message {
+pub struct Message {
     pub(crate) role: String,
     pub(crate) content: String,
 }
 
 #[derive(Deserialize)]
-pub(crate) struct ChatReq {
+pub struct ChatReq {
     pub(crate) user: Option<String>,
     pub(crate) model: Option<String>,
     pub(crate) route: Option<String>,
@@ -28,7 +26,7 @@ pub(crate) struct ChatReq {
 }
 
 #[derive(Serialize)]
-pub(crate) struct ChatResp {
+pub struct ChatResp {
     pub(crate) cached: bool,
     pub(crate) response: String,
     pub(crate) latency_ms: u128,
@@ -37,7 +35,7 @@ pub(crate) struct ChatResp {
 }
 
 #[derive(Serialize, Default)]
-pub(crate) struct MetricsOut {
+pub struct MetricsOut {
     pub(crate) total: usize,
     pub(crate) hits: usize,
     pub(crate) hit_rate: f32,
