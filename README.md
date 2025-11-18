@@ -1,4 +1,4 @@
-# Latency Slayer — Redis 8 Semantic Cache for LLMs
+# Latency Slayer — Semantic Cache for LLMs
 
 Latency Slayer is a tiny Rust web service that **caches LLM answers semantically** using Redis 8.  
 It embeds incoming prompts, does a vector **KNN** lookup (HNSW, cosine), and returns cached answers on near-duplicates.  
@@ -124,9 +124,7 @@ cargo run
 ```
 curl -s -X POST http://localhost:8080/chat \
   -H "content-type: application/json" \
-  -d '{"user":"u1","model":"gpt_5","route":"default","messages":[{"role":"user","content":"Explain the features of GPT5."}]}'
-# first = cached:false
-# second (same prompt) = cached:true with tiny hit_distance
+  -d '{"user":"u1","model":"gpt_5","route":"default","messages":[{"role":"user","content":"Explain the features of GPT 5"}]}'
 ```
 
 Open http://localhost:8080 to see the metrics and sparkline live.
